@@ -8,6 +8,13 @@
 
 #import "AppDelegate.h"
 
+// helper function to fetch the path to teh to-do list
+NSString *DocPath()
+{
+  NSArray * pathList = NSSearchPathForDirectoriesInDomains(NSDocumentationDirectory, NSUserDomainMask, YES);
+  return [pathList[0] stringByAppendingPathComponent:@"data.td"];
+} // DocPath()
+
 @interface AppDelegate ()
 
 @end
@@ -16,8 +23,19 @@
 
 #pragma mark - Application delegate callbacks
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-  // create an empty tasks array to get started
-  self.tasks = [NSMutableArray array];
+  
+  // load an existing dataset or create a new one
+  NSArray *plist = [NSArray arrayWithContentsOfFile:DocPath()];
+  
+  if (plist) // if there's an existing dataset, make a copy for use
+  {
+    self.tasks = [plist mutableCopy];
+  }
+  
+  else // creat ea new one
+  {
+    self.tasks = [NSMutableArray array];
+  }
   
   // set up screen
   CGRect winFrame = [[UIScreen mainScreen] bounds];
@@ -69,10 +87,11 @@
   // Use this method to pause ongoing tasks, disable timers, and throttle down OpenGL ES frame rates. Games should use this method to pause the game.
 }
 
-- (void)applicationDidEnterBackground:(UIApplication *)application {
-  // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later.
-  // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
-}
+- (void)applicationDidEnterBackground:(UIApplication *)application
+{
+  // save task array to disk
+  [self.tasks writeToFile:DocPath() atomically:YES];
+} // applicationDidEnterBackground()
 
 - (void)applicationWillEnterForeground:(UIApplication *)application {
   // Called as part of the transition from the background to the inactive state; here you can undo many of the changes made on entering the background.
